@@ -22,8 +22,9 @@ public:
     
     int Listen();
     int Init();
+    int Transmit();
     int Close();
-    const int PORT{30000};
+    const int PORT{30001};
     const int WAITING_NUM{3};
     
 private:

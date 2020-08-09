@@ -89,6 +89,11 @@ int Server::Init() {
     return 0;
 }
 
+int Server::Transmit() {
+    
+    return 0;
+}
+
 int Server::Close() {
     
     close(m_iListenFD);
