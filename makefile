@@ -4,10 +4,11 @@ CC=g++
 CFLAG=-c
 CLANG=-std=c++11
 
-CLIENT: client.h client.cpp
-	${CC} ${CLANG} client.cpp -o CLIENT
+CLIENT: msg.o msg.h client.h client.cpp
+	${CC} ${CLANG} -g msg.o client.cpp -o CLIENT
 
-SERVER: server.h server.cpp
-	${CC} ${CLANG} server.cpp -o SERVER
+SERVER: msg.o msg.h server.h server.cpp
+	${CC} ${CLANG} -g msg.o server.cpp -o SERVER
 	
-
+msg.o: msg.h msg.cpp
+	${CC} ${CFLAG} ${CLANG} msg.cpp

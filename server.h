@@ -18,16 +18,19 @@ using namespace std;
 class Server {
 public:
     Server();
+    Server(int); 
     ~Server();
     
     int Listen();
     int Init();
     int Transmit();
     int Close();
-    const int PORT{30001};
+    
     const int WAITING_NUM{3};
     
 private:
+    int m_iPort{30001};
+    
     int m_iListenFD;
     int m_iAcceptFD;
     socklen_t m_iClientaddr_size;

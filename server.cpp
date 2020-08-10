@@ -1,6 +1,6 @@
 #include "server.h"
 
-Server::Server() {
+Server::Server(int port) {
 //     m_iListenFD = socket(AF_INET, SOCK_STREAM, 0);
 //     
 //     try{
@@ -14,8 +14,9 @@ Server::Server() {
     
     m_sServeraddr.sin_family = AF_INET;
     m_sServeraddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    m_sServeraddr.sin_port = htons(PORT);
+    m_sServeraddr.sin_port = htons(port);
     
+    m_iPort = port;
     m_iClientaddr_size = sizeof(sockaddr_in);
     
     m_pcBuffer = new char[MAX_LENGTH];
@@ -23,9 +24,22 @@ Server::Server() {
     Init();
 }
 
+Server::Server():Server(9987) {}
+
 Server::~Server() {
     Close();
     delete []m_pcBuffer;
+}
+
+int Server::Init() {
+    
+    if((m_iListenFD = socket(AF_INET, SOCK_STREAM, 0)) == -1) printf("creating socket error\n");
+       
+    if((bind(m_iListenFD, (sockaddr *)&m_sServeraddr, sizeof(m_sServeraddr)) == -1)) printf("binding socket error\n");
+    
+    if(listen(m_iListenFD, WAITING_NUM) == -1) printf("listen socket error\n");
+    
+    return 0;
 }
 
 int Server::Listen() {
@@ -41,14 +55,37 @@ int Server::Listen() {
         
         
         cout << "connected, accepted Fd:" << m_iAcceptFD << endl;
-        bool isConnected = true;
-        Msg msg(0);
+        Transmit();
         
-        while(isConnected) {
+    }
+    
+    return 0;
+}
+
+int Server::Transmit() {
+    
+    bool isConnected = true;
+    Msg msg;
+    
+    while(isConnected) {
+    
+        read(m_iAcceptFD, &msg, sizeof(msg));
         
-            read(m_iAcceptFD, &msg, sizeof(msg));
+        cout << msg.m_eCommand << endl;
+        
+        if(msg.m_eCommand >= Msg::UNKNOWN || msg.m_eCommand < 0) {
             
-            int data_length = (msg.length);
+            m_strData = "unknown command";
+
+        }
+        
+        else if(msg.m_eCommand == Msg::QUIT) {
+            isConnected = false;
+            break;
+        }
+        
+        else {
+            int data_length = (msg.m_iLength);
             cout << data_length << endl;
             
             m_strData = string();
@@ -68,28 +105,13 @@ int Server::Listen() {
                 
                 data_length -= recv_length;
             }
-            cout << m_strData << endl;
-            write(m_iAcceptFD, m_strData.c_str(), strlen(m_strData.c_str()));
         }
-    
-        close(m_iAcceptFD);
+        
+        cout << m_strData << endl;
+        write(m_iAcceptFD, m_strData.c_str(), strlen(m_strData.c_str()));
     }
-    
-    return 0;
-}
 
-int Server::Init() {
-    
-    if((m_iListenFD = socket(AF_INET, SOCK_STREAM, 0)) == -1) printf("creating socket error\n");
-       
-    if((bind(m_iListenFD, (sockaddr *)&m_sServeraddr, sizeof(m_sServeraddr)) == -1)) printf("binding socket error\n");
-    
-    if(listen(m_iListenFD, WAITING_NUM) == -1) printf("listen socket error\n");
-    
-    return 0;
-}
-
-int Server::Transmit() {
+    close(m_iAcceptFD);
     
     return 0;
 }
@@ -101,9 +123,15 @@ int Server::Close() {
     return 0;
 }
 
-int main() {
+int main(int argc, char **argv) {
     
-    Server srv = Server();
+    if(argc != 2) {
+        cout << "Usage: filename [port]" << endl;
+        
+        return -1;
+    }
+    
+    Server srv = Server(atoi(argv[1]));
     srv.Listen();
     
     return 0;

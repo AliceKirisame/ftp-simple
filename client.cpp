@@ -44,11 +44,13 @@ int Client::Connect() {
     
     while(cin >> input) {
         
-        Msg msg(0);
-        int data_length = msg.length = strlen(input.c_str());
+        Msg msg(0, input);
+        int data_length = msg.m_iLength = strlen(input.c_str());
 
         write(m_iSocketFD, &msg, sizeof(msg));
-        write(m_iSocketFD, input.c_str(), strlen(input.c_str()));
+        
+        if(msg.m_eCommand != msg.QUIT && msg.m_eCommand != msg.UNKNOWN)
+            write(m_iSocketFD, input.c_str(), strlen(input.c_str()));
         
         m_strData = string();
         
@@ -81,13 +83,13 @@ int Client::Close() {
 
 
 int main(int argc, char **argv) {
-    if(argc != 2) {
-        cout << "Usage: filename [ip_address]" << endl;
+    if(argc != 3) {
+        cout << "Usage: filename [ip_address] [port]" << endl;
         
         return -1;
     }
 
-    Client client(argv[1], 30001);
+    Client client(argv[1], atoi(argv[2]));
     client.Connect();
     
 }
