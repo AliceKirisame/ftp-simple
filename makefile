@@ -12,3 +12,6 @@ SERVER: msg.o msg.h server.h server.cpp
 	
 msg.o: msg.h msg.cpp
 	${CC} ${CFLAG} ${CLANG} msg.cpp
+
+clean:
+	rm -rf CLIENT SERVER *.o
