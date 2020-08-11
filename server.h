@@ -12,6 +12,7 @@
 #include <exception>
 
 #include "msg.h"
+#include "transmitter.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ public:
     const int WAITING_NUM{3};
     
 private:
+    
     int m_iPort{30001};
     
     int m_iListenFD;
@@ -38,6 +40,7 @@ private:
     
     struct sockaddr_in m_sServeraddr;
     struct sockaddr_in m_sClientaddr;
+
     
     char *m_pcBuffer;
     string m_strData;

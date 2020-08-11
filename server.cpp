@@ -53,7 +53,6 @@ int Server::Listen() {
             return -1;
         }
         
-        
         cout << "connected, accepted Fd:" << m_iAcceptFD << endl;
         Transmit();
         
@@ -66,19 +65,15 @@ int Server::Transmit() {
     
     bool isConnected = true;
     Msg msg;
+    Transmitter transer(m_iAcceptFD);
     
     int recv_length;
     
     try {
 
-        while(isConnected) {
-        
-            recv_length = read(m_iAcceptFD, &msg, sizeof(msg));
+        while(transer.getIsConnected()) {
             
-            if(recv_length <= 0) {
-                isConnected = false;
-                cout << "disconneted. closing" << endl;
-            }
+            if(transer.Receive(&msg, sizeof(msg)) < 0) break;
             
             cout << "command id:" << msg.m_eCommand << endl;
             
@@ -89,7 +84,6 @@ int Server::Transmit() {
             }
             
             else if(msg.m_eCommand == Msg::QUIT) {
-                isConnected = false;
                 break;
             }
             
@@ -99,26 +93,12 @@ int Server::Transmit() {
                 
                 m_strData = string();
                 
-                while(data_length != 0) {
-                    
-                    bzero(m_pcBuffer, sizeof(m_pcBuffer));
-                    recv_length = read(m_iAcceptFD, m_pcBuffer, MAX_LENGTH - 1);
-                    
-                    if(recv_length <= 0) {
-                        data_length = 0;
-                        isConnected = false;
-                        cout << "disconneted. closing" << endl;
-                    }
-                
-                    m_strData.append(m_pcBuffer);
-                    
-                    data_length -= recv_length;
-                }
+                transer.receiveStr(m_strData, data_length);
             }
             
             cout << m_strData << endl;
 
-            write(m_iAcceptFD, m_strData.c_str(), strlen(m_strData.c_str()));
+            transer.Send(m_strData.c_str(), strlen(m_strData.c_str()));
         }
     }
     catch(...) {
