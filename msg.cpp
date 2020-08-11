@@ -10,7 +10,7 @@ Msg::Msg(int l, string s):m_iLength(l) {
     
 }
 
-Msg::Com getComId(string s) {
+Msg::Com Msg::getComId(string s) {
     
     if(s == "quit") return Msg::QUIT;
     if(s == "ls") return Msg::LS;

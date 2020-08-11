@@ -5,7 +5,7 @@ using namespace std;
 
 #define MAX_LENGTH 2048
 
-struct Msg {
+class Msg {
 public:
     
     enum Com {
@@ -17,7 +17,7 @@ public:
     Msg();
     Msg(int l, Com c);
     Msg(int l, string s);
-    
+    Msg::Com getComId(string s);
 };
 
-Msg::Com getComId(string s);
+

@@ -67,48 +67,63 @@ int Server::Transmit() {
     bool isConnected = true;
     Msg msg;
     
-    while(isConnected) {
+    int recv_length;
     
-        read(m_iAcceptFD, &msg, sizeof(msg));
-        
-        cout << msg.m_eCommand << endl;
-        
-        if(msg.m_eCommand >= Msg::UNKNOWN || msg.m_eCommand < 0) {
-            
-            m_strData = "unknown command";
+    try {
 
-        }
+        while(isConnected) {
         
-        else if(msg.m_eCommand == Msg::QUIT) {
-            isConnected = false;
-            break;
-        }
-        
-        else {
-            int data_length = (msg.m_iLength);
-            cout << data_length << endl;
+            recv_length = read(m_iAcceptFD, &msg, sizeof(msg));
             
-            m_strData = string();
-            
-            while(data_length != 0) {
-                
-                bzero(m_pcBuffer, sizeof(m_pcBuffer));
-                int recv_length = read(m_iAcceptFD, m_pcBuffer, MAX_LENGTH - 1);
-                
-                if(recv_length <= 0) {
-                    data_length = 0;
-                    isConnected = false;
-                    cout << "disconneted. closing" << endl;
-                }
-            
-                m_strData.append(m_pcBuffer);
-                
-                data_length -= recv_length;
+            if(recv_length <= 0) {
+                isConnected = false;
+                cout << "disconneted. closing" << endl;
             }
+            
+            cout << "command id:" << msg.m_eCommand << endl;
+            
+            if(msg.m_eCommand >= Msg::UNKNOWN || msg.m_eCommand < 0) {
+                
+                m_strData = "unknown command";
+
+            }
+            
+            else if(msg.m_eCommand == Msg::QUIT) {
+                isConnected = false;
+                break;
+            }
+            
+            else {
+                int data_length = (msg.m_iLength);
+                cout << "data_length:" << data_length << endl;
+                
+                m_strData = string();
+                
+                while(data_length != 0) {
+                    
+                    bzero(m_pcBuffer, sizeof(m_pcBuffer));
+                    recv_length = read(m_iAcceptFD, m_pcBuffer, MAX_LENGTH - 1);
+                    
+                    if(recv_length <= 0) {
+                        data_length = 0;
+                        isConnected = false;
+                        cout << "disconneted. closing" << endl;
+                    }
+                
+                    m_strData.append(m_pcBuffer);
+                    
+                    data_length -= recv_length;
+                }
+            }
+            
+            cout << m_strData << endl;
+
+            write(m_iAcceptFD, m_strData.c_str(), strlen(m_strData.c_str()));
         }
-        
-        cout << m_strData << endl;
-        write(m_iAcceptFD, m_strData.c_str(), strlen(m_strData.c_str()));
+    }
+    catch(...) {
+        cout << "???" << endl;
+        close(m_iAcceptFD);
     }
 
     close(m_iAcceptFD);

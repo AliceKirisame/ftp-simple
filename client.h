@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-
+#include <exception>
 
 #include "msg.h"
 

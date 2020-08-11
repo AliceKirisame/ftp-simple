@@ -42,6 +42,7 @@ int Client::Connect() {
     cout << "connected" << endl;
     string input;
     
+    cout << "input command:" << endl;
     while(cin >> input) {
         
         Msg msg(0, input);
@@ -71,6 +72,7 @@ int Client::Connect() {
         }
         
         cout << m_strData << endl;
+        cout << "input command:" << endl;
     }
     
     Close();
