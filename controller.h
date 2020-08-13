@@ -1,23 +1,43 @@
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
+
 #include <iostream>
 #include <string>
-
+#include <filesystem>
+#include <vector>
 
 #include "msg.h"
+#include "transmitter.h"
+
+using namespace std;
+using namespace std::filesystem;
 
 class Controller {
 public:
-    Controller();
-
-    int exec(Msg, string *);
-    int exec(Msg);
     
-    int quit();
-    int ls();
-    int cd();
-    int cdup();
-    int put();
-    int get();
+    Controller(string);
+    Controller(string, int);
+    ~Controller();
+    
+    int Exec();
+    
+    int Quit();
+    int Ls();
+    int Cd(int);
+    int Cdup();
+    int Put();
+    int Get();
+    
+    int setSocketFD(int);
     
 private:
-    string m_strNowDir;
+    path m_phNowDir;
+    vector<string> m_vecFiles;
+    string m_strFileList;
+    
+    int m_iSocketFD;
+    
+    Transmitter m_Transer;
 };
+
+#endif

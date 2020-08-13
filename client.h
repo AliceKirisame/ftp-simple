@@ -13,6 +13,7 @@
 #include <exception>
 
 #include "msg.h"
+#include "transmitter.h"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ public:
     ~Client();
     
     int Connect();
+    int Transmit();
     int Close();
 
 private:

@@ -2,9 +2,7 @@
 
 Server::Server(int port) {
 //     m_iListenFD = socket(AF_INET, SOCK_STREAM, 0);
-//     
-//     try{
-//         if(m_iListenFD == -1) throw -1;
+//     :
 //     }
 //     catch(int) {
 //         cout << "creating socket error" << endl;
@@ -27,6 +25,7 @@ Server::Server(int port) {
 Server::Server():Server(9987) {}
 
 Server::~Server() {
+    
     Close();
     delete []m_pcBuffer;
 }
@@ -53,62 +52,71 @@ int Server::Listen() {
             return -1;
         }
         
-        cout << "connected, accepted Fd:" << m_iAcceptFD << endl;
-        Transmit();
+        cout << "connected, accepted Fd:" << m_iAcceptFD << endl << endl;
+        Transmitter::setIsConnected(true);
+        
+        Transmit(m_iAcceptFD);
         
     }
     
     return 0;
 }
 
-int Server::Transmit() {
+int Server::Transmit(int m_iAcceptFD) {
     
-    bool isConnected = true;
-    Msg msg;
-    Transmitter transer(m_iAcceptFD);
-    
-    int recv_length;
-    
-    try {
+//     Msg msg;
+//     Transmitter transer(m_iAcceptFD);
 
-        while(transer.getIsConnected()) {
-            
-            if(transer.Receive(&msg, sizeof(msg)) < 0) break;
-            
-            cout << "command id:" << msg.m_eCommand << endl;
-            
-            if(msg.m_eCommand >= Msg::UNKNOWN || msg.m_eCommand < 0) {
-                
-                m_strData = "unknown command";
+    Controller controller(".", m_iAcceptFD);
 
-            }
-            
-            else if(msg.m_eCommand == Msg::QUIT) {
-                break;
-            }
-            
-            else {
-                int data_length = (msg.m_iLength);
-                cout << "data_length:" << data_length << endl;
-                
-                m_strData = string();
-                
-                transer.receiveStr(m_strData, data_length);
-            }
-            
-            cout << m_strData << endl;
-
-            transer.Send(m_strData.c_str(), strlen(m_strData.c_str()));
-        }
-    }
-    catch(...) {
-        cout << "???" << endl;
-        close(m_iAcceptFD);
-    }
-
-    close(m_iAcceptFD);
+    controller.Exec();
     
     return 0;
+//     try {
+// 
+//         while(transer.getIsConnected()) {
+//             
+//             if(transer.Receive(&msg, sizeof(msg)) < 0) break;
+//             
+//             cout << "command id:" << msg.m_eCommand << endl;
+//             
+//             if(msg.m_eCommand >= Msg::UNKNOWN || msg.m_eCommand < 0) {
+//                 
+//                 m_strData = "unknown command";
+// 
+//             }
+//             
+//             else if(msg.m_eCommand == Msg::QUIT) {
+//                 break;
+//             }
+//             
+//             else {
+//                 int data_length = (msg.m_iLength);
+//                 cout << "data_length:" << data_length << endl;
+//                 
+//                 m_strData = string("the command is ");
+//                 
+//                 transer.receiveStr(m_strData, data_length);
+//             }
+//             
+//             cout << m_strData << endl << endl;
+//             
+//             msg.m_iLength = m_strData.size();
+//             transer.Send(&msg, sizeof(msg));
+//             transer.Send(m_strData.c_str(), strlen(m_strData.c_str()));
+//             
+//         }
+//         
+//     }
+//     catch(...) {
+//         cout << "???" << endl;
+//         close(m_iAcceptFD);
+//     }
+//     
+//     cout << "disconnected, closing FD" << endl << endl;
+//     close(m_iAcceptFD);
+    
+    
 }
 
 int Server::Close() {

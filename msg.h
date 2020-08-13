@@ -1,3 +1,6 @@
+#ifndef MSG_H
+#define MSG_H
+
 #include <iostream>
 #include <string>
 
@@ -20,4 +23,4 @@ public:
     Msg::Com getComId(string s);
 };
 
-
+#endif

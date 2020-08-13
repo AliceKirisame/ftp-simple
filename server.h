@@ -13,6 +13,7 @@
 
 #include "msg.h"
 #include "transmitter.h"
+#include "controller.h"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ public:
     
     int Listen();
     int Init();
-    int Transmit();
+    int Transmit(int);
     int Close();
     
     const int WAITING_NUM{3};

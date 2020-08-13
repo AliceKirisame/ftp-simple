@@ -1,3 +1,6 @@
+#ifndef TRANSMITTER_H
+#define TRANSMITTER_H
+
 #include <iostream>
 #include <string>
 #include <string.h>
@@ -9,6 +12,7 @@ class Transmitter {
 public:
     
     Transmitter(int);
+    Transmitter();
     ~Transmitter();
     
     int sendStr(string &);
@@ -19,9 +23,13 @@ public:
     int Receive(void *, int);
     
     bool getIsConnected();
+    static bool setIsConnected(bool);
+    int setSocketFD(int);
     
 private:
-    bool m_bIsConnected;
+    static bool m_bIsConnected;
     int m_iSocketFD;
     char *m_pcBuffer;
 };
+
+#endif
