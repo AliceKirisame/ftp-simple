@@ -2,13 +2,15 @@
 
 Msg::Msg() {}
 
-Msg::Msg(int l, Msg::Com c):m_iLength(l), m_eCommand(c) {}
+Msg::Msg(Msg::Com c, int l):m_iLength(l), m_eCommand(c) {}
 
-Msg::Msg(int l, string s):m_iLength(l) {
+Msg::Msg(string s, int l):m_iLength(l) {
     
     m_eCommand = getComId(s);
     
 }
+
+Msg::Msg(int l) : Msg(Msg::UNKNOWN, l) {}
 
 Msg::Com Msg::getComId(string s) {
     
@@ -21,4 +23,13 @@ Msg::Com Msg::getComId(string s) {
     
     return Msg::UNKNOWN;
     
+}
+
+int Msg::setDataLength(int l) {
+    return m_iLength = l;
+}
+
+int Msg::setCommmand(Msg::Com c) {
+    m_eCommand = c;
+    return 0;
 }

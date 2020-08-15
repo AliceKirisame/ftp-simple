@@ -11,11 +11,14 @@
 #include <fcntl.h>
 
 #include <exception>
+#include <fstream>
+#include <filesystem>
 
 #include "msg.h"
 #include "transmitter.h"
 
 using namespace std;
+using namespace std::filesystem;
 
 class Client {
 public:

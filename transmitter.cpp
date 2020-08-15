@@ -1,9 +1,6 @@
 #include "transmitter.h"
-#include "msg.h"
 
-bool Transmitter::m_bIsConnected = true;
-
-Transmitter::Transmitter(int socketFD):m_iSocketFD(socketFD) {
+Transmitter::Transmitter(int socketFD):m_iSocketFD(socketFD), m_bIsConnected(true) {
     m_pcBuffer = new char[MAX_LENGTH];
 
 }
@@ -29,50 +26,53 @@ int Transmitter::setSocketFD(int socketFD) {
     return m_iSocketFD = socketFD;
 }
 
-int Transmitter::sendStr(string & sendStr) {
+int Transmitter::sendStr(string &sendStr) {
     
     int data_length = sendStr.size();
     int written_length = 0;
     
-    while(data_length != written_length) {
+    while(data_length != 0) {
         
-        int write_length = write(m_iSocketFD, sendStr.c_str() + written_length, data_length - written_length);
+        int send_length = write(m_iSocketFD, sendStr.c_str() + written_length, data_length);
         
-        if(write_length <= 0) {
+        if(send_length <= 0) {
             
-            m_bIsConnected = false;
-            cout << "Sending error" << endl;
-            return -1;
+            return errorExit("SendStr error");
+
         }
         
-        written_length += write_length;
+        written_length += send_length;
+        data_length -= send_length;
     }
     
     return 0;
 }
 
-int Transmitter::receiveStr(string & recvStr, int data_length) {
+int Transmitter::receiveStr(string &recvStr, int data_length) {
+    
     
 #ifdef DEBUG    
-    cout << "in receiveStr" << endl;
+    cout <<  endl << "in receiveStr" << endl;
     cout << "data_length " << data_length << endl;
-    cout << "recvStr length " << recvStr.size() << endl;
 #endif
+    
     
     while(data_length != 0) {
                     
         bzero(m_pcBuffer, MAX_LENGTH);
-        int recv_length = read(m_iSocketFD, m_pcBuffer, MAX_LENGTH);
+        int recv_length = read(m_iSocketFD, m_pcBuffer, data_length);
+        
+        
 #ifdef DEBUG        
-        cout << "recv_length " << recv_length << endl;
-        cout << "m_pcBuffer " << strlen(m_pcBuffer) << endl;
+        cout << endl << "recv_length " << recv_length << endl;
+        cout << "m_pcBuffer " << strlen(m_pcBuffer) << endl << endl;
 #endif
+        
+        
         if(recv_length <= 0) {
             
-            m_bIsConnected = false;
-            cout << "Receiving error" << endl;
+            return errorExit("ReceiveStr error");
             
-            return -1;
         }
     
         recvStr.append(m_pcBuffer);
@@ -80,40 +80,52 @@ int Transmitter::receiveStr(string & recvStr, int data_length) {
         data_length -= recv_length;
         
     }
+    
+    
 #ifdef DEBUG    
-    cout << "recvStr length " << recvStr.size() << endl;
-    cout << "out receiveStr" << endl;
+    cout << endl << "recvStr length " << recvStr.size() << endl;
+    cout << "out receiveStr" << endl << endl;
 #endif
+    
+    
     return 0;
 }
 
 int Transmitter::Send(const void * pData, int data_length) {
+    
+    
 #ifdef DEBUG    
-    cout << "in Send" << endl;
+    cout << endl << "in Send" << endl;
+    cout << "data_length " << data_length << endl << endl;
 #endif
+    
+    
     unsigned char *pSendData = (unsigned char *)pData;
     
     int written_length = 0;
     
-    while(data_length != written_length) {
-        int write_length = write(m_iSocketFD, pSendData + written_length, data_length - written_length);
+    while(data_length != 0) {
+        int send_length = write(m_iSocketFD, pSendData + written_length, data_length);
         
-        if(write_length <= 0) {
+        if(send_length <= 0) {
             
-            m_bIsConnected = false;
-            cout << "Sending error" << endl;
-            
-            return -1;
+            return errorExit("Sending error");
+
         }
         
-        written_length += write_length;
+        written_length += send_length;
+        data_length -= send_length;
+        
+        
 #ifdef DEBUG        
-        cout << "written_length " << written_length << " data_length " << data_length << endl;
+    cout << endl << "written_length " << written_length  << endl << endl;
 #endif
     }
 #ifdef DEBUG    
-    cout << "out Send" << endl;
+    cout << "out Send" << endl << endl;
 #endif
+    
+    
     return 0;
 }
 
@@ -128,9 +140,8 @@ void * Transmitter::Receive(int data_length) {
         
         if(recv_length <= 0) {
             
-            m_bIsConnected = false;
-            cout << "Receiving error" << endl;
-            
+            errorExit("Receiving error");
+            delete[] pRecvData;
             return NULL;
         }
         
@@ -146,17 +157,15 @@ int Transmitter::Receive(void * pData, int data_length) {
     unsigned char* pRecvData = (unsigned char *)pData;
     
     int recved_length = 0;
-    
+
     while(data_length != 0) {
                     
         int recv_length = read(m_iSocketFD, pRecvData + recved_length, data_length);
         
         if(recv_length <= 0) {
             
-            m_bIsConnected = false;
-            cout << "Receiving error" << endl;
+            return errorExit("Receiving error");
             
-            return -1;
         }
         
         recved_length += recv_length;
@@ -164,4 +173,52 @@ int Transmitter::Receive(void * pData, int data_length) {
     }
     
     return 0;
+}
+
+int Transmitter::sendFile(ifstream &targetFileStream, int data_length) {
+    
+    while(targetFileStream.good() && data_length != 0) {
+        
+        bzero(m_pcBuffer, MAX_LENGTH);
+        targetFileStream.read(m_pcBuffer, MAX_LENGTH);
+        int send_length = write(m_iSocketFD, m_pcBuffer, targetFileStream.gcount());
+        
+        if(send_length <= 0) {
+            
+            return errorExit("SendFile error");
+
+        }
+        
+        data_length -= targetFileStream.gcount();
+    }
+    
+    return 0;
+}
+
+int Transmitter::receiveFile(ofstream &targetFileStream, int data_length) {
+    
+    while(targetFileStream.good() && data_length != 0) {
+        
+        bzero(m_pcBuffer, MAX_LENGTH);
+        int recv_length = read(m_iSocketFD, m_pcBuffer, MAX_LENGTH);
+        targetFileStream.write(m_pcBuffer, recv_length);
+        
+        if(recv_length <= 0) {
+            
+            return errorExit("ReceiveFile error");
+
+        }
+        
+        data_length -= recv_length;
+        
+    }
+    
+    return 0;
+}
+
+int Transmitter::errorExit(string errorMsg) {
+    m_bIsConnected = false;
+    cout << errorMsg << endl;
+            
+    return -1;
 }

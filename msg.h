@@ -4,9 +4,9 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
+#include "defines.h"
 
-#define MAX_LENGTH 2048
+using namespace std;
 
 class Msg {
 public:
@@ -18,9 +18,13 @@ public:
     int m_iLength;
     
     Msg();
-    Msg(int l, Com c);
-    Msg(int l, string s);
-    Msg::Com getComId(string s);
+    Msg(Com c, int l);
+    Msg(string s, int l);
+    Msg(int l);
+    
+    Com getComId(string s);
+    int setDataLength(int);
+    int setCommmand(Com);
 };
 
 #endif

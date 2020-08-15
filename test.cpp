@@ -4,8 +4,10 @@
 using namespace std;
 using namespace std::filesystem;
 
+#include "test.h"
+
 int main(){
-	cout << "hello world" << endl;
+	cout << DEBUG << endl;
 
 	return 0;
 }

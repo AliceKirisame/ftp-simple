@@ -5,6 +5,9 @@
 #include <string>
 #include <string.h>
 #include <unistd.h>
+#include <fstream>
+
+#include "msg.h"
 
 using namespace std;
 
@@ -21,13 +24,18 @@ public:
     int Send(const void *, int);
     void * Receive(int);
     int Receive(void *, int);
+
+    int sendFile(ifstream &, int);
+    int receiveFile(ofstream &, int);
     
     bool getIsConnected();
-    static bool setIsConnected(bool);
+    bool setIsConnected(bool);
     int setSocketFD(int);
     
+    int errorExit(string);
+    
 private:
-    static bool m_bIsConnected;
+    bool m_bIsConnected;
     int m_iSocketFD;
     char *m_pcBuffer;
 };

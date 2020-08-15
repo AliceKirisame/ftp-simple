@@ -5,6 +5,8 @@
 #include <string>
 #include <filesystem>
 #include <vector>
+#include <exception>
+#include <fstream>
 
 #include "msg.h"
 #include "transmitter.h"
@@ -25,8 +27,8 @@ public:
     int Ls();
     int Cd(int);
     int Cdup();
-    int Put();
-    int Get();
+    int Put(int);
+    int Get(int);
     
     int setSocketFD(int);
     

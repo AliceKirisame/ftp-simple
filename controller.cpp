@@ -30,7 +30,7 @@ int Controller::Exec() {
     try {
 
         while(m_Transer.getIsConnected()) {
-            
+
             if(m_Transer.Receive(&msg, sizeof(msg)) < 0) break;
             
             cout << "command id:" << msg.m_eCommand << endl;
@@ -58,17 +58,17 @@ int Controller::Exec() {
                     break;
                     
                 case Msg::PUT:
-                    Put();
+                    Put(msg.m_iLength);
                     break;
                     
                 case Msg::GET:
-                    Get();
+                    Get(msg.m_iLength);
                     break;
                     
                 default:
                     string error_msg = "unknown command";
                     
-                    Msg msg(error_msg.size(), error_msg);
+                    Msg msg(error_msg.size());
             
                     m_Transer.Send(&msg, sizeof(msg));
                     m_Transer.Send(error_msg.c_str(), error_msg.size());
@@ -76,13 +76,10 @@ int Controller::Exec() {
             }
         }
     }
-    catch(...) {
-        cout << "???" << endl;
-        close(m_iSocketFD);
+    catch(exception e) {
+        cout << e.what() << endl;
+        return -1;
     }
-    
-    cout << "disconnected, closing FD" << endl << endl;
-    close(m_iSocketFD);
 
     return 0;
 }
@@ -96,7 +93,7 @@ int Controller::Quit() {
 
 int Controller::Ls() {
     
-    Msg msg(m_strFileList.size(), "");
+    Msg msg(m_strFileList.size());
     
     cout << "return:\n" <<m_strFileList << endl;
     m_Transer.Send(&msg, sizeof(msg));
@@ -132,7 +129,7 @@ int Controller::Cd(int data_length) {
     
 //     m_strFileList = string("cd");
     cout << "return:\n" <<m_strFileList << endl;
-    Msg msg(m_strFileList.size(), "");
+    Msg msg(m_strFileList.size());
     
     m_Transer.Send(&msg, sizeof(msg));
     m_Transer.Send(m_strFileList.c_str(), m_strFileList.size());
@@ -159,7 +156,7 @@ int Controller::Cdup() {
     }
     
 //     m_strFileList = string("cdup");
-    Msg msg(m_strFileList.size(), "");
+    Msg msg(m_strFileList.size());
     
     cout << "return:\n" <<m_strFileList << endl;
     m_Transer.Send(&msg, sizeof(msg));
@@ -168,26 +165,69 @@ int Controller::Cdup() {
     return 0;
 }
 
-int Controller::Put() {
+int Controller::Put(int data_length) {
     
-    string re_msg = "put command";
-            
-    Msg msg(re_msg.size(), re_msg);
+#ifdef DEBUG
+    cout << "data_length:" << data_length << endl;
+#endif
+    
+    
+    string filename;
+    m_Transer.receiveStr(filename, data_length);
+    
+    
+#ifdef DEBUG
+    cout << "filename:" << filename << endl;
+#endif
+    
+    
+    path filePath = m_phNowDir;
+    filePath.append(filename);
+    
+    
+#ifdef DEBUG
+    cout << "filePath:" << string(filePath) << endl;
+#endif    
+    
+    
+    Msg msg(0);
+    m_Transer.Receive(&msg, sizeof(msg));
 
+    int targetFileLength = msg.m_iLength;
+    ofstream targetFileStream(filePath, ios::out|ios::binary|ios::trunc);
+    m_Transer.receiveFile(targetFileStream, targetFileLength);
+    
+    msg.m_iLength = file_size(filePath);
+    
     m_Transer.Send(&msg, sizeof(msg));
-    m_Transer.Send(re_msg.c_str(), re_msg.size());
     
     return 0;
 }
 
-int Controller::Get() {
-    
-    string re_msg = "get command";
-            
-    Msg msg(re_msg.size(), re_msg);
+int Controller::Get(int data_length) {
 
+#ifdef DEBUG
+    cout << "data_length:" << data_length << endl;
+#endif
+    string filename;
+    m_Transer.receiveStr(filename, data_length);
+#ifdef DEBUG
+    cout << "filename:" << filename << endl;
+#endif
+    path filePath = m_phNowDir;
+
+    filePath.append(filename);
+#ifdef DEBUG
+    cout << "filePath:" << string(filePath) << endl;
+#endif    
+    
+    int targetFileLength = file_size(filePath);
+    ifstream targetFileStream(filePath, ios::in|ios::binary);
+
+    Msg msg(targetFileLength);
+    
     m_Transer.Send(&msg, sizeof(msg));
-    m_Transer.Send(re_msg.c_str(), re_msg.size());
+    m_Transer.sendFile(targetFileStream, targetFileLength);
     
     return 0;
 }
