@@ -45,7 +45,7 @@ int Client::Connect() {
     
     cout << "connected" << endl;
     
-    Transmit();
+    Transmit(m_iSocketFD);
 //     string input;
 //     
 //     cout << "input command:" << endl;
@@ -85,83 +85,99 @@ int Client::Connect() {
     return 0;
 }
 
-int Client::Transmit() {
-    string input;
-    string name;
-    Transmitter transer(m_iSocketFD);
+int Client::Transmit(int SocketFD) {
     
-    cout << "input command:" << endl;
-    while(transer.getIsConnected() && cin >> input) {
-        
-        if(input == "exit" || input == "quit") {
-            Msg msg(Msg::QUIT, sizeof(Msg));
-            transer.Send(&msg, sizeof(Msg));
-            cout << "exiting" << endl;
-            break;
-        }
-        
-        if(input == "cd" || input == "get" || input == "put") {
-            
-            cin >> name;
-            
-            Msg msg(input, 0);
-            
-            msg.m_iLength = name.size();
+    
+#ifdef DEBUG
+    cout << endl << "in Transmit" << endl;
+#endif
 
-            transer.Send(&msg, sizeof(msg));
-            
-            transer.Send(name.c_str(), name.size());
-        }
+    
+    Controller * controller = new ClientController(SocketFD);
+    controller->Transmit();
         
-        else {
-            Msg msg(input, 0);
-            
-            transer.Send(&msg, sizeof(msg));
-        }
-        
-        if(input == "put") {
-            
-            path filePath(".");
-            filePath.append(name);
-            
-            Msg msg(file_size(name));
-            
-            transer.Send(&msg, sizeof(msg));
-            
-            ifstream targetFile(name, ios::in|ios::binary);
-            transer.sendFile(targetFile, msg.m_iLength);
-            
-            transer.Receive(&msg, sizeof(msg));
-            
-            cout << "Transmited " << msg.m_iLength << " bytes" << endl;
-        }
-        else {
-            Msg msg;
-            
-        transer.Receive(&msg, sizeof(msg));
-        
-        if(input == "get") {
-            ofstream targetFile(name, ios::out|ios::binary|ios::trunc);
-            transer.receiveFile(targetFile, msg.m_iLength);
-        }
-        
-        else {
-            string strData = string("");
-            transer.receiveStr(strData, msg.m_iLength);
-            
-    #ifdef DEBUG
-            cout << endl << "strData.size():should be " << msg.m_iLength << endl;
-            cout << "strData.size():" << strData.size() << endl << endl;
-    #endif
-            
-            cout << strData << endl;
-        }
-        }
-        
-        
-        
-        cout << "input command:" << endl;
-    }
+    
+#ifdef DEBUG
+    cout << endl << "out Transmit" << endl;
+#endif
+
+  
+//     string input;
+//     string name;
+//     Transmitter transer(m_iSocketFD);
+//     
+//     cout << "input command:" << endl;
+//     while(transer.getIsConnected() && cin >> input) {
+//         
+//         if(input == "exit" || input == "quit") {
+//             Msg msg(Msg::QUIT, sizeof(Msg));
+//             transer.Send(&msg, sizeof(Msg));
+//             cout << "exiting" << endl;
+//             break;
+//         }
+//         
+//         if(input == "cd" || input == "get" || input == "put") {
+//             
+//             cin >> name;
+//             
+//             Msg msg(input, 0);
+//             
+//             msg.m_iLength = name.size();
+// 
+//             transer.Send(&msg, sizeof(msg));
+//             
+//             transer.Send(name.c_str(), name.size());
+//         }
+//         
+//         else {
+//             Msg msg(input, 0);
+//             
+//             transer.Send(&msg, sizeof(msg));
+//         }
+//         
+//         if(input == "put") {
+//             
+//             path filePath(".");
+//             filePath.append(name);
+//             
+//             Msg msg(file_size(name));
+//             
+//             transer.Send(&msg, sizeof(msg));
+//             
+//             ifstream targetFile(name, ios::in|ios::binary);
+//             transer.sendFile(targetFile, msg.m_iLength);
+//             
+//             transer.Receive(&msg, sizeof(msg));
+//             
+//             cout << "Transmited " << msg.m_iLength << " bytes" << endl;
+//         }
+//         else {
+//             Msg msg;
+//             
+//         transer.Receive(&msg, sizeof(msg));
+//         
+//         if(input == "get") {
+//             ofstream targetFile(name, ios::out|ios::binary|ios::trunc);
+//             transer.receiveFile(targetFile, msg.m_iLength);
+//         }
+//         
+//         else {
+//             string strData = string("");
+//             transer.receiveStr(strData, msg.m_iLength);
+//             
+//     #ifdef DEBUG
+//             cout << endl << "strData.size():should be " << msg.m_iLength << endl;
+//             cout << "strData.size():" << strData.size() << endl << endl;
+//     #endif
+//             
+//             cout << strData << endl;
+//         }
+//         }
+//         
+//         
+//         
+//         cout << "input command:" << endl;
+//     }
     
     return 0;
 }

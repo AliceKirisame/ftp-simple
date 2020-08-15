@@ -1,5 +1,5 @@
-#ifndef BASECONTROLLER_H
-#define BASECONTROLLER_H
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
 
 #include <iostream>
 #include <string>
@@ -13,12 +13,13 @@
 using namespace std;
 using namespace std::filesystem;
 
-class BaseController {
+class Controller {
 public:
     
-    BaseController(string, int);
-    BaseController(string);
-    ~BaseController();
+    Controller(string, int);
+    Controller(string);
+    Controller(int);
+    ~Controller();
     
     virtual int Transmit() = 0;
     
@@ -36,6 +37,8 @@ public:
 
     virtual int Get() = 0;
     
+    virtual int Unknown() = 0;
+    
     int setSocketFD(int);
     
 protected:
@@ -46,7 +49,7 @@ protected:
     vector<string> m_vecFiles;
     string m_strFileList;
     
-    string m_strTargetFileName;
+    string m_strTargetData;
     int m_iTargetDataLength;
     
     int m_iSocketFD;

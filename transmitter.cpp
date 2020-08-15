@@ -183,6 +183,12 @@ int Transmitter::sendFile(ifstream &targetFileStream, int data_length) {
         targetFileStream.read(m_pcBuffer, MAX_LENGTH);
         int send_length = write(m_iSocketFD, m_pcBuffer, targetFileStream.gcount());
         
+        
+#ifdef DEBUG
+        cout << endl << "send_length " << send_length << endl << endl;
+#endif  
+        
+        
         if(send_length <= 0) {
             
             return errorExit("SendFile error");
@@ -202,6 +208,12 @@ int Transmitter::receiveFile(ofstream &targetFileStream, int data_length) {
         bzero(m_pcBuffer, MAX_LENGTH);
         int recv_length = read(m_iSocketFD, m_pcBuffer, MAX_LENGTH);
         targetFileStream.write(m_pcBuffer, recv_length);
+   
+        
+#ifdef DEBUG
+        cout << endl << "recv_length " << recv_length << endl << endl;
+#endif        
+
         
         if(recv_length <= 0) {
             

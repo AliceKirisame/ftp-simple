@@ -1,5 +1,5 @@
-#ifndef CLIENTCONTROLLER_H
-#define CLIENTCONTROLLER_H
+#ifndef SERVER_CONTROLLER_H
+#define SERVER_CONTROLLER_H
 
 #include <iostream>
 #include <string>
@@ -12,12 +12,14 @@
 #include "transmitter.h"
 #include "Controller.h"
 
-class ClientController : public Controller {
+class ServerController : public Controller {
+    
 public:
-    ClientController(string);
-    ClientController(string, int);
-    ClientController(int);
-    ~ClientController();
+    ServerController(string, int);
+    ServerController(string);
+    ServerController(int);
+    
+    ~ServerController();
     
     virtual int Transmit();
     
@@ -32,6 +34,8 @@ public:
     virtual int Get();
     
     virtual int Unknown();
+    
 };
+
 
 #endif

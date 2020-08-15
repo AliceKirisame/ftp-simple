@@ -1,6 +1,6 @@
-#include "BaseController.h"
+#include "Controller.h"
 
-BaseController::BaseController(string initDir, int socketFD) : m_phNowDir(initDir), m_iSocketFD(socketFD) ,m_Transer(Transmitter(socketFD)){
+Controller::Controller(string initDir, int socketFD) : m_phNowDir(initDir), m_iSocketFD(socketFD) ,m_Transer(Transmitter(socketFD)){
 
     directory_iterator its(initDir);
     
@@ -14,17 +14,21 @@ BaseController::BaseController(string initDir, int socketFD) : m_phNowDir(initDi
 
 }
 
-BaseController::BaseController(string initDir) : BaseController(initDir, -1){
+Controller::Controller(string initDir) : Controller(initDir, -1){
 
 }
 
-BaseController::~BaseController() {}
+Controller::Controller(int socketFD) : Controller(".", socketFD){
 
-int BaseController::setSocketFD(int socketFD) {
+}
+
+Controller::~Controller() {}
+
+int Controller::setSocketFD(int socketFD) {
     return m_Transer.setSocketFD(socketFD);
 }
 
-int BaseController::Exec() {
+int Controller::Exec() {
 
     switch(m_Msg.m_eCommand) {
         
@@ -57,19 +61,14 @@ int BaseController::Exec() {
             break;
             
         default:
-            string error_msg = "unknown command";
-            
-            Msg msg(error_msg.size());
-    
-            m_Transer.Send(&msg, sizeof(msg));
-            m_Transer.Send(error_msg.c_str(), error_msg.size());
+            Unknown();
             break;
     }
 
     return 0;
 }
 
-int BaseController::Quit() {
+int Controller::Quit() {
     
     m_Transer.setIsConnected(false);
     

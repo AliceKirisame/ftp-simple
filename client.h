@@ -16,6 +16,7 @@
 
 #include "msg.h"
 #include "transmitter.h"
+#include "ClientController.h"
 
 using namespace std;
 using namespace std::filesystem;
@@ -26,7 +27,7 @@ public:
     ~Client();
     
     int Connect();
-    int Transmit();
+    int Transmit(int);
     int Close();
 
 private:

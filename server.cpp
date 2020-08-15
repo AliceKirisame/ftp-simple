@@ -61,9 +61,12 @@ int Server::Listen() {
 
 int Server::Transmit(int m_iAcceptFD) {
 
-    Controller controller(".", m_iAcceptFD);
-
-    controller.Exec();
+//     Controller controller(".", m_iAcceptFD);
+// 
+//     controller.Exec();
+    
+    Controller *controller = new ServerController(m_iAcceptFD); 
+    controller->Transmit();
     
     cout << "disconnected, closing FD" << endl << endl;
     close(m_iAcceptFD);
